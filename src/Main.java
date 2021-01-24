@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main {
@@ -6,7 +8,6 @@ public class Main {
     private static Tile[][] Board = new Tile[6][7];
     private static Scanner input = new Scanner(System.in);
     private static String playerColor;
-    private static int winner;
 
     public static void main(String[] args) {
 
@@ -15,13 +16,13 @@ public class Main {
         String player1 = input.nextLine();
         System.out.println("Please select second player. (H/A)");
         String player2 = input.nextLine();
-
+        printBoard();
         boolean statement = true;
         while (statement) {
             if (player1.equals("H")) {
                 humanPlayer(0);
             } else if (player1.equals("A")) {
-                //ai implmentasyonundan sonra eklenecek
+                aiPlayer(0);
             }
             if (isThereAnyWinner()) {
                 statement = false;
@@ -31,7 +32,7 @@ public class Main {
             if (player2.equals("H")) {
                 humanPlayer(1);
             } else if (player2.equals("A")) {
-                //ai implmentasyonundan sonra eklenecek
+                aiPlayer(1);
             }
             if (isThereAnyWinner()) {
                 statement = false;
@@ -51,17 +52,126 @@ public class Main {
             playerColor = "X";
         else if (color == 1)
             playerColor = "O";
-        printBoard();
         System.out.println("It's your turn : " + playerColor + "\nPlease select a column that you want to insert your tile.");
         while (true) {
             int columnSelected = input.nextInt();
-            if (canInsertThisIndex(columnSelected)) {
-                insertTile(columnSelected, color);
+            if (canInsertThisIndex(columnSelected - 1)) {
+                insertTile(columnSelected - 1, color);
+                printBoard();
                 break;
             } else {
                 System.out.println("This column is not available. Please enter other value!");
             }
         }
+    }
+
+    public static void aiPlayer(int color) {
+        if (color == 0)
+            playerColor = "X";
+        else if (color == 1)
+            playerColor = "O";
+        System.out.println("It's turn of " + playerColor + "\nPlease wait.");
+        ArrayList<Integer> values = getChildrenMinimaxValues(getChildren(Board, color), color);
+        int min = Integer.MAX_VALUE;
+        int index = -1;
+        for (int i = 0; i < values.size(); i++) {
+            if (min > values.get(i)) {
+                min = values.get(i);
+                index = i;
+            }
+        }
+        Board = copyArray(getChildren(Board, color).get(index));
+        printBoard();
+    }
+
+    public static int minimax(Tile[][] board, int depth, boolean maxPlayer, int color) {
+        int value;
+        if (depth == 0 || getChildren(board, color) == null)
+            return heuristic(board);
+
+        if (maxPlayer) {
+            value = Integer.MIN_VALUE;
+            ArrayList<Tile[][]> childrenList = getChildren(board, color);
+            for (Tile[][] child : childrenList) {
+                value = Math.max(value, minimax(child, depth - 1, false, 1));
+            }
+            return value;
+        } else {
+            value = Integer.MAX_VALUE;
+            ArrayList<Tile[][]> childrenList = getChildren(board, color);
+            for (Tile[][] child : childrenList) {
+                value = Math.min(value, minimax(child, depth - 1, true, 0));
+            }
+            return value;
+        }
+    }
+
+    public static ArrayList<Tile[][]> getChildren(Tile[][] board, int color) {
+        ArrayList<Tile[][]> childrenList = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            if (canInsertThisIndex(i)) {
+                Tile[][] childBoard = copyArray(board);
+                Tile tile = new Tile(rowTileWillState, i, color);
+                childBoard[rowTileWillState][i] = tile;
+                childrenList.add(childBoard);
+            }
+        }
+        return childrenList;
+    }
+
+    public static ArrayList<Integer> getChildrenMinimaxValues(ArrayList<Tile[][]> childrenList, int color) {
+        ArrayList<Integer> values = new ArrayList<>();
+        for (Tile[][] child : childrenList) {
+            values.add(minimax(child, 5, true, color));
+        }
+        return values;
+    }
+
+    public static int heuristic(Tile[][] board) {
+        int columnCounter = 0;
+        int rowCounter = 0;
+        int diagonalRightCounter = 0;
+        int maxCounter = 0;
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < 7; j++) {
+                if (board[i][j] == null)
+                    continue;
+                rowCounter++;
+                if (i == j)
+                    diagonalRightCounter++;
+            }
+            if (maxCounter < rowCounter)
+                maxCounter = rowCounter;
+            if ((maxCounter < diagonalRightCounter))
+                maxCounter = diagonalRightCounter;
+            rowCounter = 0;
+        }
+
+        for (int j = 0; j < 7; j++) {
+            for (int i = 0; i < 6; i++) {
+                if (board[i][j] == null)
+                    continue;
+                columnCounter++;
+            }
+            if (maxCounter < columnCounter)
+                maxCounter = columnCounter;
+            columnCounter = 0;
+        }
+
+
+        return maxCounter;
+    }
+
+    public static Tile[][] copyArray(Tile[][] array) {
+        if (array == null) {
+            return null;
+        }
+
+        final Tile[][] result = new Tile[array.length][];
+        for (int i = 0; i < array.length; i++) {
+            result[i] = Arrays.copyOf(array[i], array[i].length);
+        }
+        return result;
     }
 
     public static boolean isBoardFull() {
@@ -102,6 +212,8 @@ public class Main {
         if (horizontalWin())
             return true;
         if (diagonalRightWin())
+            return true;
+        if (diagonalLeftWin())
             return true;
         return false;
     }
@@ -164,7 +276,7 @@ public class Main {
     }
 
     public static void printBoard() {
-        System.out.println("-------------------------");
+        System.out.println("-----------------------------");
         for (int i = 0; i < 6; i++) {
             for (int j = 0; j < 7; j++) {
                 if (Board[i][j] == null)
@@ -176,10 +288,13 @@ public class Main {
                         playerColor = "O";
                     System.out.print("| " + playerColor + " ");
                 }
+                if (j == 6)
+                    System.out.print("|");
 
             }
-            System.out.println("\n-------------------------");
+            System.out.println("\n-----------------------------");
         }
+        System.out.println("  1   2   3   4   5   6   7");
     }
 
     static class Tile {
