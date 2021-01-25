@@ -102,8 +102,6 @@ public class Main {
 
     public static int minimax(Tile[][] board, int depth, boolean maxPlayer, int color, int heuristic) {
         int value;
-        int h;
-
 
         if (depth == 0 || getChildren(board, color) == null || isThereAnyWinner(board)) {
             if (heuristic == 1)
@@ -115,8 +113,6 @@ public class Main {
             else
                 System.exit(1);
         }
-
-
         if (maxPlayer) {
             value = Integer.MIN_VALUE;
             ArrayList<Tile[][]> childrenList = getChildren(board, 0);
@@ -150,7 +146,6 @@ public class Main {
         ArrayList<Integer> values = new ArrayList<>();
         for (Tile[][] child : childrenList) {
             int value = minimax(child, depth, true, color, heuristic);
-            System.out.println(value);
             values.add(value);
         }
         return values;
@@ -196,7 +191,9 @@ public class Main {
                     counter3 -= diagonalLeftThree(board, opp);
                     counter2 += diagonalLeftTwo(board, turn);
                     counter2 -= diagonalLeftTwo(board, opp);
-                    maxCounter += 100000 * Math.pow(counter4, counter4) + 100 * Math.pow(counter3, counter3) + Math.pow(counter2, counter2);
+                    maxCounter += 100000 * Math.pow(counter4, counter4) +
+                            100 * Math.pow(counter3, counter3) +
+                            Math.pow(counter2, counter2);
                 }
             }
         }
@@ -519,6 +516,10 @@ public class Main {
         return false;
     }
 
+    /**
+     * Check methods to find the winner
+     **/
+
     public static boolean isThereAnyWinner(Tile[][] board) {
         if (verticalWin(board))
             return true;
@@ -531,21 +532,15 @@ public class Main {
         return false;
     }
 
-    /**
-     * Check methods to find the winner
-     **/
-
     public static boolean horizontalWin(Tile[][] board) {
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 6; i++)
             for (int j = 0; j < 4; j++) {
                 if (board[i][j] == null || board[i][j + 1] == null || board[i][j + 2] == null || board[i][j + 3] == null)
                     continue;
                 int color = board[i][j].tileColor;
-                if (board[i][j + 1].tileColor == color && board[i][j + 2].tileColor == color && board[i][j + 3].tileColor == color) {
+                if (board[i][j + 1].tileColor == color && board[i][j + 2].tileColor == color && board[i][j + 3].tileColor == color)
                     return true;
-                }
             }
-        }
         return false;
     }
 
