@@ -451,11 +451,9 @@ public class Main {
         return counter;
     }
 
-
     /**
      * Other methods for game
      **/
-
 
     public static Tile[][] copyArray(Tile[][] array) {
         if (array == null) {
@@ -532,7 +530,6 @@ public class Main {
             return true;
         return false;
     }
-
 
     /**
      * Check methods to find the winner
