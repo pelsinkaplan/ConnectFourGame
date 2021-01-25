@@ -165,6 +165,52 @@ public class Main {
                 if (board[i][j] != null && board[i][j + 1] != null && board[i][j + 2] != null && board[i][j + 3] != null) {
                     int color = board[i][j].tileColor;
                     if (board[i][j + 1].tileColor == color && board[i][j + 2].tileColor == color && board[i][j + 3].tileColor == color && color != turn) {
+                        maxCounter += -100000;
+                        break;
+                    }
+                }
+
+                int opp = Math.abs(turn - 1);
+                if (maxCounter != -100000) {
+                    int counter4 = horizontalFourRow(board, turn);
+                    counter4 -= horizontalFourRow(board, opp);
+                    int counter3 = horizontalThreeRow(board, turn);
+                    counter3 -= horizontalThreeRow(board, opp);
+                    int counter2 = horizontalTwoRow(board, turn);
+                    counter2 -= horizontalTwoRow(board, opp);
+                    counter4 += verticalFourColumn(board, turn);
+                    counter4 -= verticalFourColumn(board, opp);
+                    counter3 += verticalThreeColumn(board, turn);
+                    counter3 -= verticalThreeColumn(board, opp);
+                    counter2 += verticalTwoColumn(board, turn);
+                    counter2 -= verticalTwoColumn(board, opp);
+                    counter4 += diagonalRightFour(board, turn);
+                    counter4 -= diagonalRightFour(board, opp);
+                    counter3 += diagonalRightThree(board, turn);
+                    counter3 -= diagonalRightThree(board, opp);
+                    counter2 += diagonalRightTwo(board, turn);
+                    counter2 -= diagonalRightTwo(board, opp);
+                    counter4 += diagonalLeftFour(board, turn);
+                    counter4 -= diagonalLeftFour(board, opp);
+                    counter3 += diagonalLeftThree(board, turn);
+                    counter3 -= diagonalLeftThree(board, opp);
+                    counter2 += diagonalLeftTwo(board, turn);
+                    counter2 -= diagonalLeftTwo(board, opp);
+                    maxCounter += 100000 * Math.pow(counter4, counter4) + 100 * Math.pow(counter3, counter3) + Math.pow(counter2, counter2);
+                }
+            }
+        }
+        return maxCounter;
+    }
+
+    public static int heuristic2(Tile[][] board, int turn) {
+        int maxCounter = 0;
+
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < 4; j++) {
+                if (board[i][j] != null && board[i][j + 1] != null && board[i][j + 2] != null && board[i][j + 3] != null) {
+                    int color = board[i][j].tileColor;
+                    if (board[i][j + 1].tileColor == color && board[i][j + 2].tileColor == color && board[i][j + 3].tileColor == color && color != turn) {
                         maxCounter = -100000;
                         break;
                     }
@@ -189,34 +235,6 @@ public class Main {
         return maxCounter;
     }
 
-    public static int heuristic2(Tile[][] board, int turn) {
-        int maxCounter = 0;
-
-        for (int i = 0; i < 6; i++) {
-            for (int j = 0; j < 4; j++) {
-                if (board[i][j] != null && board[i][j + 1] != null && board[i][j + 2] != null && board[i][j + 3] != null) {
-                    int color = board[i][j].tileColor;
-                    if (board[i][j + 1].tileColor == color && board[i][j + 2].tileColor == color && board[i][j + 3].tileColor == color && color != turn) {
-                        maxCounter = -100000;
-                        break;
-                    }
-                }
-                if (maxCounter != -100000) {
-                    int counter3 = horizontalThreeRow(board, turn);
-                    int counter2 = horizontalTwoRow(board, turn);
-                    counter3 += verticalThreeColumn(board, turn);
-                    counter2 += verticalTwoColumn(board, turn);
-                    counter3 += diagonalRightThree(board, turn);
-                    counter2 += diagonalRightTwo(board, turn);
-                    counter3 += diagonalLeftThree(board, turn);
-                    counter2 += diagonalLeftTwo(board, turn);
-                    maxCounter += 100 * Math.pow(counter3, counter3) + Math.pow(counter2, counter2);
-                }
-            }
-        }
-        return maxCounter;
-    }
-
     public static int heuristic3(Tile[][] board, int turn) {
         int maxCounter = 0;
 
@@ -230,11 +248,19 @@ public class Main {
                     }
                 }
                 if (maxCounter != -100000) {
+                    int counter4 = horizontalFourRow(board, turn);
+                    int counter3 = horizontalThreeRow(board, turn);
                     int counter2 = horizontalTwoRow(board, turn);
+                    counter4 += verticalFourColumn(board, turn);
+                    counter3 += verticalThreeColumn(board, turn);
                     counter2 += verticalTwoColumn(board, turn);
+                    counter4 += diagonalRightFour(board, turn);
+                    counter3 += diagonalRightThree(board, turn);
                     counter2 += diagonalRightTwo(board, turn);
+                    counter4 += diagonalLeftFour(board, turn);
+                    counter3 += diagonalLeftThree(board, turn);
                     counter2 += diagonalLeftTwo(board, turn);
-                    maxCounter += Math.pow(counter2, counter2);
+                    maxCounter += 100000 * Math.pow(counter4, 2) + 100 * Math.pow(counter3, 2) + Math.pow(counter2, 2);
                 }
             }
         }
